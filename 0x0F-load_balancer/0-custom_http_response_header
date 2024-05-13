@@ -1,22 +1,41 @@
 #!/usr/bin/env bash
-# Install and setup nginx server
-sudo apt-get update
-sudo apt-get -y install nginx
-echo "Hello World!" > /var/www/html/index.html
-echo "Ceci n'est pas une page
-" > /var/www/html/404.html
-server_setup="server {
-                listen 80 default_server;
-                listen [::]:80 default_server;
+#Configure Nginx so that its HTTP response contains a custom header
+NGINX_CONF_FILE="/etc/nginx/sites-enabled/default"
 
-                root /var/www/html;
-                index index.html;
-}"
-add_redirect="\n\tlocation /redirect_me {\n\t\treturn 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\t}"
-add_404="\n\terror_page 404 /404.html;\n\tlocation = /404.html{\n\t\tinternal;\n\t}"
-add_header="\n\tadd_header X-Served-By $(hostname);"
-echo "$server_setup" | sudo tee /etc/nginx/sites-available/default >/dev/null
-sudo sed -i "\$i\\$add_redirect" /etc/nginx/sites-available/default
-sudo sed -i "\$i\\$add_404" /etc/nginx/sites-available/default
-sudo sed -i "\$i\\$add_header" /etc/nginx/sites-available/default
-sudo service nginx restart
+# Configure Nginx only if the custom configurations are not already present
+    sudo apt-get update -y
+    sudo apt-get install nginx -y
+    ufw allow 'Nginx HTTP'
+    sudo service nginx start
+    echo -e "install nginx done"
+    echo -e "Hello World!" > index.html
+    sudo mv index.html /var/www/html/index.nginx-debian.html
+    echo -e "writing html file"
+    echo -e "Ceci n'est pas une page" > error.html
+    sudo mv error.html /var/www/html/404.html
+    echo -e "writing 404 file"
+
+if ! grep -o "location /redirect_me" "$NGINX_CONF_FILE"; then
+    # Add configurations only if they don't already exist
+    sudo sed -i "/server_name _/a location /redirect_me {rewrite ^ https://www.github.com/amyn00 permanent; }" "$NGINX_CONF_FILE"
+    echo -e "set the redirect"
+
+    if ! grep -o "location = /404.html" "$NGINX_CONF_FILE"; then
+        sudo sed -i "/server_name _/a \
+            error_page 404 /404.html;\n\
+            location = /404.html {\n\
+                internal;\n\
+            }" "$NGINX_CONF_FILE"
+        echo -e "set the error 404 config"
+    fi
+
+    if ! grep -o "add_header X-Served-By" "$NGINX_CONF_FILE"; then
+        sudo sed -i "/server_name _/a add_header X-Served-By $HOSTNAME;" "$NGINX_CONF_FILE"
+        echo -e "set the custom header"
+    fi
+
+    sudo service nginx restart
+    echo -e "Done"
+else
+    echo -e "Nginx is already configured. No changes made."
+fi
