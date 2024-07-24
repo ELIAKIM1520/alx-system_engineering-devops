@@ -1,0 +1,39 @@
+# main.py
+
+import requests  # Importing the requests library for potential future use, although not currently used in this script.
+
+def sum_numbers(numbers):
+    """
+    Sum a list of numbers.
+
+    This function takes a list of integers and returns their sum. It iterates through
+    each number in the list, adds it to a running total, and returns the total sum.
+
+    Args:
+    numbers (list of int): List of numbers to sum.
+
+    Returns:
+    int: The sum of the numbers.
+    """
+    total_sum = 0  # Initialize the total sum to zero.
+    
+    for number in numbers:  # Loop through each number in the list.
+        total_sum += number  # Add the current number to the total sum.
+    
+    return total_sum  # Return the total sum of the numbers.
+
+def main():
+    """
+    Main function to demonstrate the use of sum_numbers function.
+
+    This function defines a list of numbers, calls the sum_numbers function with this list,
+    and prints the result to the console.
+    """
+    numbers = [1, 2, 3, 4, 5]  # Define a list of numbers to sum.
+    result = sum_numbers(numbers)  # Call the sum_numbers function and store the result.
+    
+    print(f"The sum of the numbers is: {result}")  # Print the result to the console.
+
+if __name__ == "__main__":
+    main()  # If this script is run directly, execute the main function.
+
